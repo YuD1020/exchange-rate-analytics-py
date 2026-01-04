@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 
-app = FastAPI()
+app = FastAPI(title="Exchange Rate Analytics API")
 
-@app.get("/")
-def health():
+
+@app.get("/health")
+def health_check():
     return {"status": "ok"}
