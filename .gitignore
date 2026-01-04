@@ -1,14 +1,22 @@
 __pycache__/
 *.pyc
-*.egg-info/
+*.pyo
+*.pyd
 
 .env
 backend/.env
 frontend/.env
 
-*.db
+backend/poetry.lock
+backend/*.egg-info/
+
 *.sqlite
+*.db
+
 *.log
 
 .vscode/
 .idea/
+
+.DS_Store
+Thumbs.db
