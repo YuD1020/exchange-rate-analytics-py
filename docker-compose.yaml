@@ -2,33 +2,13 @@ services:
   backend:
     image: python:3.11-slim
     container_name: exchange-rate-backend
-    working_dir: /app
+    working_dir: /workspace/backend
     volumes:
-      - ./backend:/app
+      - .:/workspace
     ports:
       - "8000:8000"
     env_file:
-      - .env
+      - backend/.env
     tty: true
     stdin_open: true
     command: bash
-  db:
-    image: postgres:latest
-    container_name: exchange-rate-db
-    environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: exchange_rates
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    networks:
-      - exchange_rate_net
-
-volumes:
-  postgres-data:
-
-networks:
-  exchange_rate_net:
-    driver: bridge
