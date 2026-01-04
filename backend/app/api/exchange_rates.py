@@ -1,13 +1,18 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
-router = APIRouter(prefix="/exchange-rates", tags=["exchange-rates"])
+from app.services.exchange_rate_service import ExchangeRateService
+from app.repositories.exchange_rate_repository import ExchangeRateRepository
+
+router = APIRouter(prefix="/exchange-rates", tags=["Exchange Rates"])
+
+
+def get_exchange_rate_service() -> ExchangeRateService:
+    repo = ExchangeRateRepository()
+    return ExchangeRateService(repo)
+
 
 @router.get("/")
-def list_exchange_rates():
-    return {
-        "base": "USD",
-        "rates": {
-            "ILS": 3.7,
-            "EUR": 0.92
-        }
-    }
+def get_exchange_rates(
+    service: ExchangeRateService = Depends(get_exchange_rate_service),
+):
+    return service.get_exchange_rates()

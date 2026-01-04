@@ -4,7 +4,7 @@ from app.api.exchange_rates import router as exchange_rates_router
 
 app = FastAPI(title=settings.app_name)
 
-app.include_router(exchange_rates_router)
+app.include_router(exchange_rates_router, prefix="/api")
 
 
 @app.get("/health")
@@ -13,5 +13,3 @@ def health_check():
         "status": "ok",
         "environment": settings.environment
     }
-
-
