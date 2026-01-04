@@ -1,15 +1,14 @@
-*.pyc
 __pycache__/
+*.pyc
+*.egg-info/
 
 .env
 backend/.env
 frontend/.env
 
 *.db
-*.log
 *.sqlite
+*.log
 
-*.pytest_cache
 .vscode/
 .idea/
-env/
