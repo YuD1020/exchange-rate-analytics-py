@@ -1,13 +1,10 @@
-from datetime import date
+from sqlalchemy.orm import Session
+
+from app.models.exchange_rate import ExchangeRate
 
 class ExchangeRateRepository:
-    def get_latest_rates(self) -> dict:
-        return {
-            "base": "USD",
-            "date": date.today().isoformat(),
-            "rates": {
-                "ILS": 3.72,
-                "EUR": 0.91,
-                "GBP": 0.78,
-            },
-        }
+    def __init__(self, db: Session):
+        self.db = db
+
+    def get_all(self):
+        return self.db.query(ExchangeRate).all()

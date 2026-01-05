@@ -1,15 +1,10 @@
 from fastapi import FastAPI
-from app.core.settings import settings
-from app.api.exchange_rates import router as exchange_rates_router
 
-app = FastAPI(title=settings.app_name)
+from app.api.v1.api import api_router
+from app.core.database import Base, engine
 
-app.include_router(exchange_rates_router, prefix="/api")
+Base.metadata.create_all(bind=engine)
 
+app = FastAPI(title="Exchange Rate Analytics")
 
-@app.get("/health")
-def health_check():
-    return {
-        "status": "ok",
-        "environment": settings.environment
-    }
+app.include_router(api_router, prefix="/api/v1")
