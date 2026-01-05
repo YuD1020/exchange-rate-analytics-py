@@ -5,4 +5,4 @@ class ExchangeRateService:
         self.repo = repo
 
     def list_rates(self):
-        return self.repo.get_all()
+        return self.repo.get_all_by_list()
