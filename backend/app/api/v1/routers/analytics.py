@@ -4,10 +4,13 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.repositories.exchange_rate_repository import ExchangeRateRepository
 from app.analytics.averages import monthly_averages
+from app.analytics.forecast import forecast_next
 from app.analytics.matrices import difference_matrix, multiply_matrices
-from app.services.analytics_service import AnalyticsService
 
-router = APIRouter(prefix="/analytics", tags=["Analytics"])
+router = APIRouter(
+    prefix="/analytics",
+    tags=["Analytics"]
+)
 
 
 @router.get("/monthly-averages")
@@ -17,37 +20,38 @@ def get_monthly_averages(db: Session = Depends(get_db)):
 
 
 @router.get("/forecast")
-def forecast(db: Session = Depends(get_db)):
-    rates = monthly_averages(
-        ExchangeRateRepository(db).get_all_by_list()
-    )
+def get_forecast(db: Session = Depends(get_db)):
+    rates = ExchangeRateRepository(db).get_all_by_list()
+    averages_dict = monthly_averages(rates)
+    averages = list(averages_dict.values())
 
-    forecast_value = AnalyticsService(rates).forecast_next_month()
+    if len(averages) < 3:
+        return {"forecast_next_month": None}
 
     return {
-        "forecast_next_month": forecast_value
+        "forecast_next_month": forecast_next(averages)
     }
 
 
 @router.get("/matrices")
-def matrices(db: Session = Depends(get_db)):
+def get_matrices(db: Session = Depends(get_db)):
     rates = ExchangeRateRepository(db).get_all_by_list()
     averages = list(monthly_averages(rates).values())
 
-    if len(averages) < 3:
+    if len(averages) < 4:
         return {
             "difference": [],
             "product": []
         }
 
-    forecast = [
+    forecast_series = [
         sum(averages[i-3:i]) / 3
         for i in range(3, len(averages) + 1)
     ]
 
     actual = averages[3:]
 
-    diff = difference_matrix(actual, forecast)
+    diff = difference_matrix(actual, forecast_series)
     product = multiply_matrices(actual, diff)
 
     return {
