@@ -2,6 +2,7 @@ from app.analytics.averages import monthly_averages
 from app.analytics.forecast import forecast_next
 from app.analytics.matrices import difference_matrix, multiply_matrices
 
+
 class AnalyticsService:
     def __init__(self, rates):
         self.rates = rates
@@ -17,10 +18,7 @@ class AnalyticsService:
 
     def matrices(self):
         averages = list(self.monthly_averages().values())
-        forecast = [
-            forecast_next(averages[:i+3])
-            for i in range(len(averages)-2)
-        ]
+        forecast = [forecast_next(averages[: i + 3]) for i in range(len(averages) - 2)]
 
         actual = averages[2:]
         diff = difference_matrix(actual, forecast)
@@ -31,4 +29,3 @@ class AnalyticsService:
             "difference": diff,
             "product": product,
         }
-        

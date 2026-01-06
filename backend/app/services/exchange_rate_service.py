@@ -1,5 +1,6 @@
 from app.repositories.exchange_rate_repository import ExchangeRateRepository
 
+
 class ExchangeRateService:
     def __init__(self, repo: ExchangeRateRepository):
         self.repo = repo

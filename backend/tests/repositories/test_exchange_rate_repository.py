@@ -1,6 +1,7 @@
 from app.models.exchange_rate import ExchangeRate
 from app.repositories.exchange_rate_repository import ExchangeRateRepository
 
+
 def test_list_exchange_rates(db):
     repo = ExchangeRateRepository(db)
 
