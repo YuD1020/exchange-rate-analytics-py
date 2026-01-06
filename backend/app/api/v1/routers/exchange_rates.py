@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.schemas.exchange_rate import ExchangeRateResponse
 from app.repositories.exchange_rate_repository import ExchangeRateRepository
 from app.services.exchange_rate_service import ExchangeRateService
 
