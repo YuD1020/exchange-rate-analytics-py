@@ -7,10 +7,7 @@ from app.analytics.averages import monthly_averages
 from app.analytics.forecast import forecast_next
 from app.analytics.matrices import difference_matrix, multiply_matrices
 
-router = APIRouter(
-    prefix="/analytics",
-    tags=["Analytics"]
-)
+router = APIRouter(prefix="/analytics", tags=["Analytics"])
 
 
 @router.get("/monthly-averages")
@@ -28,9 +25,7 @@ def get_forecast(db: Session = Depends(get_db)):
     if len(averages) < 3:
         return {"forecast_next_month": None}
 
-    return {
-        "forecast_next_month": forecast_next(averages)
-    }
+    return {"forecast_next_month": forecast_next(averages)}
 
 
 @router.get("/matrices")
@@ -39,14 +34,10 @@ def get_matrices(db: Session = Depends(get_db)):
     averages = list(monthly_averages(rates).values())
 
     if len(averages) < 4:
-        return {
-            "difference": [],
-            "product": []
-        }
+        return {"difference": [], "product": []}
 
     forecast_series = [
-        sum(averages[i-3:i]) / 3
-        for i in range(3, len(averages) + 1)
+        sum(averages[i - 3 : i]) / 3 for i in range(3, len(averages) + 1)
     ]
 
     actual = averages[3:]
@@ -54,7 +45,4 @@ def get_matrices(db: Session = Depends(get_db)):
     diff = difference_matrix(actual, forecast_series)
     product = multiply_matrices(actual, diff)
 
-    return {
-        "difference": diff,
-        "product": product
-    }
+    return {"difference": diff, "product": product}
