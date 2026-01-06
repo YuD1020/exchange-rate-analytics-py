@@ -3,9 +3,8 @@ name: 🧪 CI
 on:
   push:
 
-
 jobs:
-  🧹-🎨-🧪:
+  lint-format-test:
     name: 🧹 Lint · 🎨 Format · 🧪 Test
     runs-on: ubuntu-latest
 
