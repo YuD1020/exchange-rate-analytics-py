@@ -1,5 +1,4 @@
 from collections import defaultdict
-from datetime import date
 from app.models.exchange_rate import ExchangeRate
 
 def monthly_averages(rates: list[ExchangeRate]) -> dict[str, float]:
