@@ -20,20 +20,21 @@ jobs:
       - name: ⬆️ Upgrade pip
         run: python -m pip install --upgrade pip
 
-      - name: 📦 Install backend
+      - name: 📦 Install dependencies
         working-directory: backend
         run: |
-          pip install .
-          pip install ruff pytest
+          pip install poetry
+          poetry install --no-root
 
       - name: 🧹 Ruff lint
         working-directory: backend
-        run: ruff check app tests
+        run: poetry run ruff check app tests
 
       - name: 🎨 Ruff format (check)
         working-directory: backend
-        run: ruff format app tests --check
+        run: poetry run ruff format app tests --check
 
       - name: 🧪 Run tests
         working-directory: backend
-        run: pytest
+        run: poetry run pytest
+
