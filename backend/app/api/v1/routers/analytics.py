@@ -1,48 +1,33 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.repositories.exchange_rate_repository import ExchangeRateRepository
-from app.analytics.averages import monthly_averages
-from app.analytics.forecast import forecast_next
-from app.analytics.matrices import difference_matrix, multiply_matrices
+from app.repositories.monthly_average_repository import MonthlyAverageRepository
+from app.analytics.service import AnalyticsService
 
 router = APIRouter(prefix="/analytics", tags=["Analytics"])
 
 
 @router.get("/monthly-averages")
-def get_monthly_averages(db: Session = Depends(get_db)):
-    rates = ExchangeRateRepository(db).get_all_by_list()
-    return monthly_averages(rates)
+def monthly_averages(
+    sort_by: str | None = Query(None),
+    order: str = Query("asc"),
+    db: Session = Depends(get_db),
+):
+    repo = MonthlyAverageRepository(db)
+    rows = repo.list(sort_by=sort_by, order=order)
+    return [{"month": r.month, "average_rate": r.average_rate} for r in rows]
 
 
 @router.get("/forecast")
-def get_forecast(db: Session = Depends(get_db)):
-    rates = ExchangeRateRepository(db).get_all_by_list()
-    averages_dict = monthly_averages(rates)
-    averages = list(averages_dict.values())
-
-    if len(averages) < 3:
-        return {"forecast_next_month": None}
-
-    return {"forecast_next_month": forecast_next(averages)}
+def forecast(db: Session = Depends(get_db)):
+    rows = MonthlyAverageRepository(db).list(sort_by="month")
+    service = AnalyticsService(rows)
+    return {"forecast_next_month": service.forecast()}
 
 
 @router.get("/matrices")
-def get_matrices(db: Session = Depends(get_db)):
-    rates = ExchangeRateRepository(db).get_all_by_list()
-    averages = list(monthly_averages(rates).values())
-
-    if len(averages) < 4:
-        return {"difference": [], "product": []}
-
-    forecast_series = [
-        sum(averages[i - 3 : i]) / 3 for i in range(3, len(averages) + 1)
-    ]
-
-    actual = averages[3:]
-
-    diff = difference_matrix(actual, forecast_series)
-    product = multiply_matrices(actual, diff)
-
-    return {"difference": diff, "product": product}
+def matrices(db: Session = Depends(get_db)):
+    rows = MonthlyAverageRepository(db).list(sort_by="month")
+    service = AnalyticsService(rows)
+    return service.matrices()

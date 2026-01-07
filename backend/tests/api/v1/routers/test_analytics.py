@@ -1,7 +1,7 @@
 def test_monthly_averages(client):
     res = client.get("/api/v1/analytics/monthly-averages")
     assert res.status_code == 200
-    assert isinstance(res.json(), dict)
+    assert isinstance(res.json(), list)
 
 
 def test_forecast(client):
@@ -13,4 +13,5 @@ def test_forecast(client):
 def test_matrices(client):
     res = client.get("/api/v1/analytics/matrices")
     assert res.status_code == 200
+    assert "difference" in res.json()
     assert "product" in res.json()
