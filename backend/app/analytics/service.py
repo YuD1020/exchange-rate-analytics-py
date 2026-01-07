@@ -1,31 +1,32 @@
 from app.analytics.averages import monthly_averages
 from app.analytics.forecast import forecast_next
 from app.analytics.matrices import difference_matrix, multiply_matrices
+from app.models.monthly_average import MonthlyAverage
 
 
 class AnalyticsService:
-    def __init__(self, rates):
-        self.rates = rates
+    def __init__(self, rows: list[MonthlyAverage]):
+        self.values = [r.average_rate for r in rows]
 
-    def monthly_averages(self):
-        return monthly_averages(self.rates)
-
-    def forecast_next_month(self):
-        averages = list(self.rates.values())
-        if len(averages) < 3:
+    def forecast(self) -> float | None:
+        if len(self.values) < 3:
             return None
-        return forecast_next(averages)
+        return forecast_next(self.values)
 
-    def matrices(self):
-        averages = list(self.monthly_averages().values())
-        forecast = [forecast_next(averages[: i + 3]) for i in range(len(averages) - 2)]
+    def matrices(self) -> dict:
+        if len(self.values) < 4:
+            return {"difference": [], "product": []}
 
-        actual = averages[2:]
-        diff = difference_matrix(actual, forecast)
+        forecast_series = [
+            sum(self.values[i - 3 : i]) / 3
+            for i in range(3, len(self.values) + 1)
+        ]
+
+        actual = self.values[3:]
+        diff = difference_matrix(actual, forecast_series)
         product = multiply_matrices(actual, diff)
 
         return {
-            "forecast": forecast,
             "difference": diff,
             "product": product,
         }
