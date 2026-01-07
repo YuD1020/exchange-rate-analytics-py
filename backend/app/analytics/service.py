@@ -18,8 +18,7 @@ class AnalyticsService:
             return {"difference": [], "product": []}
 
         forecast_series = [
-            sum(self.values[i - 3 : i]) / 3
-            for i in range(3, len(self.values) + 1)
+            sum(self.values[i - 3 : i]) / 3 for i in range(3, len(self.values) + 1)
         ]
 
         actual = self.values[3:]

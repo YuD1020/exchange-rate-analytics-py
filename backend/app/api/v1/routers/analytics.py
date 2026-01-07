@@ -16,10 +16,7 @@ def monthly_averages(
 ):
     repo = MonthlyAverageRepository(db)
     rows = repo.list(sort_by=sort_by, order=order)
-    return [
-        {"month": r.month, "average_rate": r.average_rate}
-        for r in rows
-    ]
+    return [{"month": r.month, "average_rate": r.average_rate} for r in rows]
 
 
 @router.get("/forecast")
