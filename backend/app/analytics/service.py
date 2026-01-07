@@ -1,4 +1,3 @@
-from app.analytics.averages import monthly_averages
 from app.analytics.forecast import forecast_next
 from app.analytics.matrices import difference_matrix, multiply_matrices
 from app.models.monthly_average import MonthlyAverage
