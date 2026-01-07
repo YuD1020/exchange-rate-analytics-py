@@ -1,27 +1,26 @@
-from collections import defaultdict
-from datetime import date
+from sqlalchemy.orm import Session
 
-from app.schemas.analytics import MonthlyAverageRate
-from app.services.exchange_rate_client import ExchangeRateClient
-from app.utils.dates import month_key
+from app.models.monthly_average import MonthlyAverage
 
 
 class MonthlyAverageService:
-    def __init__(self, client: ExchangeRateClient):
-        self.client = client
+    def __init__(self, db: Session):
+        self.db = db
 
-    def calculate(self, start: date, end: date) -> list[MonthlyAverageRate]:
-        rates = self.client.fetch(start, end)
+    def save(self, month: str, average_rate: float) -> None:
+        exists = (
+            self.db.query(MonthlyAverage).filter(MonthlyAverage.month == month).first()
+        )
+        if exists:
+            return
 
-        buckets: dict[str, list[float]] = defaultdict(list)
-
-        for day_str, rate in rates.items():
-            buckets[month_key(date.fromisoformat(day_str))].append(rate)
-
-        return [
-            MonthlyAverageRate(
+        self.db.add(
+            MonthlyAverage(
                 month=month,
-                average_rate=round(sum(values) / len(values), 4),
+                average_rate=average_rate,
             )
-            for month, values in sorted(buckets.items())
-        ]
+        )
+        self.db.commit()
+
+    def list_all(self) -> list[MonthlyAverage]:
+        return self.db.query(MonthlyAverage).order_by(MonthlyAverage.month).all()

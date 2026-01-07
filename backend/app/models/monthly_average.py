@@ -1,5 +1,4 @@
-from sqlalchemy import Column, Integer, Float, String, UniqueConstraint
-
+from sqlalchemy import Column, Integer, String, Float, UniqueConstraint
 from app.core.database import Base
 
 
@@ -10,4 +9,4 @@ class MonthlyAverage(Base):
     month = Column(String, nullable=False)
     average_rate = Column(Float, nullable=False)
 
-    __table_args__ = (UniqueConstraint("month", name="uq_monthly_average_month"),)
+    __table_args__ = (UniqueConstraint("month", name="uq_monthly_averages_month"),)
