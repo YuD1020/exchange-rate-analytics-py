@@ -1,33 +1,43 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter
+from app.analytics.service import (
+    forecast_next_month,
+    get_forecast_matrix,
+    get_difference_matrix,
+    get_product_matrix,
+)
+from app.schemas.monthly_average import MonthlyAverageResponse
+from app.services.monthly_average_service import MonthlyAverageService
+from app.core.database import get_db
+from fastapi import Depends
 from sqlalchemy.orm import Session
 
-from app.core.database import get_db
-from app.repositories.monthly_average_repository import MonthlyAverageRepository
-from app.analytics.service import AnalyticsService
-
-router = APIRouter(prefix="/analytics", tags=["Analytics"])
-
-
-@router.get("/monthly-averages")
-def monthly_averages(
-    sort_by: str | None = Query(None),
-    order: str = Query("asc"),
-    db: Session = Depends(get_db),
-):
-    repo = MonthlyAverageRepository(db)
-    rows = repo.list(sort_by=sort_by, order=order)
-    return [{"month": r.month, "average_rate": r.average_rate} for r in rows]
+router = APIRouter(
+    prefix="/analytics",
+    tags=["Analytics"],
+)
 
 
-@router.get("/forecast")
-def forecast(db: Session = Depends(get_db)):
-    rows = MonthlyAverageRepository(db).list(sort_by="month")
-    service = AnalyticsService(rows)
-    return {"forecast_next_month": service.forecast()}
+@router.get("/monthly-averages", response_model=list[MonthlyAverageResponse])
+def monthly_averages(db: Session = Depends(get_db)):
+    service = MonthlyAverageService(db)
+    return service.list_all()
 
 
-@router.get("/matrices")
-def matrices(db: Session = Depends(get_db)):
-    rows = MonthlyAverageRepository(db).list(sort_by="month")
-    service = AnalyticsService(rows)
-    return service.matrices()
+@router.get("/forecast-next")
+def forecast_next():
+    return {"forecast": forecast_next_month()}
+
+
+@router.get("/forecast-matrix")
+def forecast_matrix():
+    return {"matrix": get_forecast_matrix()}
+
+
+@router.get("/difference-matrix")
+def difference_matrix():
+    return {"matrix": get_difference_matrix()}
+
+
+@router.get("/product-matrix")
+def product_matrix():
+    return {"matrix": get_product_matrix()}

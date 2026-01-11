@@ -1,30 +1,44 @@
-from app.analytics.forecast import forecast_next
-from app.analytics.matrices import difference_matrix, multiply_matrices
-from app.models.monthly_average import MonthlyAverage
+from app.analytics.matrix import (
+    forecast_matrix,
+    difference_matrix,
+    average_difference_row,
+    multiply_matrices,
+)
+from app.services.monthly_average_service import MonthlyAverageService
+from app.core.database import SessionLocal
 
 
-class AnalyticsService:
-    def __init__(self, rows: list[MonthlyAverage]):
-        self.values = [r.average_rate for r in rows]
+def _get_monthly_values():
+    db = SessionLocal()
+    try:
+        service = MonthlyAverageService(db)
+        return [item.average for item in service.list_all()]
+    finally:
+        db.close()
 
-    def forecast(self) -> float | None:
-        if len(self.values) < 3:
-            return None
-        return forecast_next(self.values)
 
-    def matrices(self) -> dict:
-        if len(self.values) < 4:
-            return {"difference": [], "product": []}
+def forecast_next_month():
+    values = _get_monthly_values()
+    return sum(values[-3:]) / 3
 
-        forecast_series = [
-            sum(self.values[i - 3 : i]) / 3 for i in range(3, len(self.values) + 1)
-        ]
 
-        actual = self.values[3:]
-        diff = difference_matrix(actual, forecast_series)
-        product = multiply_matrices(actual, diff)
+def get_forecast_matrix():
+    return forecast_matrix(_get_monthly_values())
 
-        return {
-            "difference": diff,
-            "product": product,
-        }
+
+def get_difference_matrix():
+    values = _get_monthly_values()
+    forecast = forecast_matrix(values)
+    diff = difference_matrix(values, forecast)
+    return average_difference_row(diff)
+
+
+def get_product_matrix():
+    forecast = get_forecast_matrix()
+    diff = get_difference_matrix()
+
+    if not forecast or not diff:
+        return []
+
+    return multiply_matrices(forecast, diff[:-1])
+
